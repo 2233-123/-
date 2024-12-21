@@ -8,45 +8,34 @@ public class Main {
      * @param args 命令行参数
      */
     public static void main(String[] args) {
-        // 初始化总用牌数
-        long sumsumcard = 0;
-        // 初始化平均用牌数
-        double averagecard = 0;
-        // 初始化当前用牌数
-        int sumcard = 0;
         // 初始化迭代次数
-        int time = 100000;
-        // 初始化内层迭代次数
-        int time1 = 1000000;
+        int time = 100000000;
+
         // 初始化临时变量
         int temp = 0;
         // 初始化夹断次数
-        int numOfDie = 0;
-        // 初始化平均夹断概率
-        double averageOfDie = 0;
-        // 初始化另一个夹断次数
-        int numOfDie1 = 0;
-        // 初始化另一个平均夹断概率
-        double averageOfDie1 = 0;
-
+        int[] numOfDie = new int[20];
+        numOfDie[0] = 0;
+        for(int i=1;i<20;i++){
+            numOfDie[i] = 0;
+        }
+        double[] avgOfDie = new double[20];
         // 将 time 和 time1 转换为科学计数法的字符串表示
         String scientificNotationTime = String.format("%.0e", (double) time);
-        String scientificNotationTime1 = String.format("%.0e", (double) time1);
-
         // 创建一个 Random 对象，用于生成随机数
         Random rand = new Random();
 
         // 打印本次实验的参数设置
-        System.out.println("本次实验每次卡牌迭代" + scientificNotationTime1 + "次，模拟卡牌迭代" + scientificNotationTime + "次");
+        System.out.println("本次实验模拟卡牌迭代" + scientificNotationTime + "次");
         System.out.println("");
 
         // 遍历不同的卡牌数量限制
-        for (int cardNumLimit = 2; cardNumLimit < 6; cardNumLimit++) {
+        for (int cardNumLimit = 5; cardNumLimit < 6; cardNumLimit++) {
             // 遍历不同的醉意等级
             for (int level = 0; level < 5; level++) {
                 // 如果醉意等级为 4，则用牌数期望为无穷大，夹断概率为 0%
                 if (level == 4) {
-                    System.out.println("有" + cardNumLimit + "张卡牌位时醉意等级为" + level + "的杜康用牌数期望为无穷大，20张牌前夹断概率为0%，10张牌前夹断概率为0%");
+                    System.out.println("醉意等级为" + level + "时不会夹断");
                     break;
                 }
                 // 进行 time 次模拟
@@ -59,49 +48,148 @@ public class Main {
                         temp = rand.nextInt(3);
                         initialCard.add(temp + 1);
                     }
-                    // 进行 time1 次卡牌迭代
-                    for (int i = 0; i < time1; i++) {
+                    for (int i = 0; i < 21; i++) {
                         // 如果卡牌用完，则记录夹断次数
                         if (initialCard.size() == 0) {
-                            if (sumcard < 20) {
-                                numOfDie++;
-                            }
-                            if (sumcard < 10) {
-                                numOfDie1++;
-                            }
+                            numOfDie[i-1]++;
                             break;
                         }
                         // 根据当前的醉意等级和卡牌数量限制来抽取新的卡牌
                         drawCard(initialCard, level, cardNumLimit);
-                        // 累计用牌数
-                        sumcard++;
+                        if(i==19 && initialCard.size() != 0){
+                            numOfDie[0]++;
+                            break;
+                        }
+
                     }
-                    // 累计总用牌数
-                    sumsumcard += sumcard;
-                    // 重置当前用牌数
-                    sumcard = 0;
+
                 }
-                // 计算平均用牌数
-                averagecard = (double) sumsumcard / time;
+
                 // 计算夹断概率
-                averageOfDie = (double) numOfDie / time * 100;
-                averageOfDie1 = (double) numOfDie1 / time * 100;
-                // 将平均用牌数和夹断概率格式化为两位小数的字符串
-                String avg = String.format("%.2f", averagecard);
-                String avg1 = String.format("%.2f", averageOfDie);
-                String avg2 = String.format("%.2f", averageOfDie1);
+                for (int i = 0; i < 20; i++) {
+                    avgOfDie[i] = (double)numOfDie[i] / time * 100;
+                }
                 // 打印当前条件下的统计数据
-                System.out.println("有" + cardNumLimit + "张卡牌位时醉意等级为" + level + "的杜康用牌数期望为" + avg + "，20张牌前夹断概率为" + avg1 + "%" + "，10张牌前夹断概率为" + avg2 + "%");
-                // 重置总用牌数
-                sumsumcard = 0;
-                // 重置夹断次数
-                numOfDie = 0;
-                // 重置另一个夹断次数
-                numOfDie1 = 0;
+                System.out.println("醉意等级为" + level + "时：");
+                for(int i=1;i<20;i++){
+                    String avgStringOfDie = String.format("%.3f", avgOfDie[i]);
+                    System.out.println("第" + (i+1) + "张牌夹断概率为" + avgStringOfDie + "%");
+                }
+                String avgStringOfNoDie = String.format("%.3f", avgOfDie[0]);
+                System.out.println("20张牌不夹断概率为" + avgStringOfNoDie + "%");
+                System.out.println("");
+                for(int i=0;i<20;i++){
+                    numOfDie[i] = 0;
+                }
             }
             System.out.println("");
         }
     }
+//    public static void main(String[] args) {
+//        // 初始化总用牌数
+//        long sumsumcard = 0;
+//        // 初始化平均用牌数
+//        double averagecard = 0;
+//        // 初始化当前用牌数
+//        int sumcard = 0;
+//        // 初始化迭代次数
+//        int time = 1000000;
+//        // 初始化内层迭代次数
+//        int time1 = 100000;
+//        // 初始化临时变量
+//        int temp = 0;
+//        // 初始化夹断次数
+//        int numOfDie = 0;
+//        // 初始化平均夹断概率
+//        double averageOfDie = 0;
+//        // 初始化另一个夹断次数
+//        int numOfDie1 = 0;
+//        // 初始化另一个平均夹断概率
+//        double averageOfDie1 = 0;
+//        // 初始化另一个夹断次数
+//        int numOfDie2 = 0;
+//        // 初始化另一个平均夹断概率
+//        double averageOfDie2 = 0;
+//        // 将 time 和 time1 转换为科学计数法的字符串表示
+//        String scientificNotationTime = String.format("%.0e", (double) time);
+//        String scientificNotationTime1 = String.format("%.0e", (double) time1);
+//
+//        // 创建一个 Random 对象，用于生成随机数
+//        Random rand = new Random();
+//
+//        // 打印本次实验的参数设置
+//        System.out.println("本次实验每次卡牌迭代" + scientificNotationTime1 + "次，模拟卡牌迭代" + scientificNotationTime + "次");
+//        System.out.println("");
+//
+//        // 遍历不同的卡牌数量限制
+//        for (int cardNumLimit = 2; cardNumLimit < 6; cardNumLimit++) {
+//            // 遍历不同的醉意等级
+//            for (int level = 0; level < 5; level++) {
+//                // 如果醉意等级为 4，则用牌数期望为无穷大，夹断概率为 0%
+//                if (level == 4) {
+//                    System.out.println("有" + cardNumLimit + "张卡牌位时醉意等级为" + level + "的杜康用牌数期望为无穷大，20张牌前夹断概率为0%，10张牌前夹断概率为0%，5张牌前夹断概率为0%");
+//                    break;
+//                }
+//                // 进行 time 次模拟
+//                for (int j = 0; j < time; j++) {
+//                    // 创建一个 ArrayList 来存储初始卡牌
+//                    ArrayList<Integer> initialCard = new ArrayList<>();
+//                    // 初始卡牌为 0 为无，1 为红，2 为黄，3 为绿
+//                    for (int i = 0; i < 2; i++) {
+//                        // 随机生成初始卡牌
+//                        temp = rand.nextInt(3);
+//                        initialCard.add(temp + 1);
+//                    }
+//                    // 进行 time1 次卡牌迭代
+//                    for (int i = 0; i < time1; i++) {
+//                        // 如果卡牌用完，则记录夹断次数
+//                        if (initialCard.size() == 0) {
+//                            if (sumcard < 20) {
+//                                numOfDie++;
+//                            }
+//                            if (sumcard < 10) {
+//                                numOfDie1++;
+//                            }
+//                            if (sumcard < 5) {
+//                                numOfDie2++;
+//                            }
+//                            break;
+//                        }
+//                        // 根据当前的醉意等级和卡牌数量限制来抽取新的卡牌
+//                        drawCard(initialCard, level, cardNumLimit);
+//                        // 累计用牌数
+//                        sumcard++;
+//                    }
+//                    // 累计总用牌数
+//                    sumsumcard += sumcard;
+//                    // 重置当前用牌数
+//                    sumcard = 0;
+//                }
+//                // 计算平均用牌数
+//                averagecard = (double) sumsumcard / time;
+//                // 计算夹断概率
+//                averageOfDie = (double) numOfDie / time * 100;
+//                averageOfDie1 = (double) numOfDie1 / time * 100;
+//                averageOfDie2 = (double) numOfDie2 / time * 100;
+//                // 将平均用牌数和夹断概率格式化为两位小数的字符串
+//                String avg = String.format("%.2f", averagecard);
+//                String avg1 = String.format("%.2f", averageOfDie);
+//                String avg2 = String.format("%.2f", averageOfDie1);
+//                String avg3 = String.format("%.2f", averageOfDie2);
+//                // 打印当前条件下的统计数据
+//                System.out.println("有" + cardNumLimit + "张卡牌位时醉意等级为" + level + "的杜康用牌数期望为" + avg + "，20张牌前夹断概率为" + avg1 + "%" + "，10张牌前夹断概率为" + avg2 + "%"+"，5张牌前夹断概率为" + avg3 + "%");
+//                // 重置总用牌数
+//                sumsumcard = 0;
+//                // 重置夹断次数
+//                numOfDie = 0;
+//                // 重置另一个夹断次数
+//                numOfDie1 = 0;
+//                // 重置另一个夹断次数
+//                numOfDie2 = 0;
+//            }
+//            System.out.println("");
+//        }
+//    }
     /**
      * 从初始卡牌列表中打出一张卡牌，并根据打出的卡牌和当前醉意等级添加新的卡牌
      *
